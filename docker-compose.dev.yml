@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库服务
+  postgres:
+    image: postgres:15-alpine
+    container_name: voicehub-db-dev
+    environment:
+      POSTGRES_USER: voicehub
+      POSTGRES_PASSWORD: dev_password_123
+      POSTGRES_DB: voicehub_dev
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U voicehub -d voicehub_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # Nuxt 开发服务器
+  voicehub-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: voicehub-app-dev
+    ports:
+      - "3010:3000"
+      - "9229:9229"
+    environment:
+      DATABASE_URL: postgresql://voicehub:dev_password_123@postgres:5432/voicehub_dev
+      JWT_SECRET: dev-jwt-secret-change-in-production
+      NODE_ENV: development
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - pnpm_store:/root/.local/share/pnpm/store
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data_dev:
+    driver: local
+  pnpm_store:
+    driver: local
