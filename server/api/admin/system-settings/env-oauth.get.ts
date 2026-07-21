@@ -29,6 +29,7 @@ export default defineEventHandler((event) => {
     hasGoogleConfig: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
     hasAggregateConfig:
       hasEnvValue(process.env.AGGREGATE_OAUTH_APP_ID) &&
-      hasEnvValue(process.env.AGGREGATE_OAUTH_APP_KEY)
+      hasEnvValue(process.env.AGGREGATE_OAUTH_APP_KEY),
+    hasQQConfig: hasEnvValue(process.env.QQ_CLIENT_ID) && hasEnvValue(process.env.QQ_CLIENT_SECRET)
   }
 })

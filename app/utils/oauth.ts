@@ -69,7 +69,8 @@ export const getProviderDisplayName = (provider: string): string => {
     casdoor: 'Casdoor',
     google: 'Google',
     oauth2: '第三方 OAuth',
-    aggregate: '聚合登陆'
+    aggregate: '聚合登陆',
+    qq: 'QQ 登录'
   }
   return map[normalizedProvider] || provider.charAt(0).toUpperCase() + provider.slice(1)
 }

@@ -427,6 +427,10 @@ export default defineEventHandler(async (event) => {
       body.aggregateOAuthEnabled !== undefined
         ? body.aggregateOAuthEnabled
         : (settings?.aggregateOAuthEnabled ?? false)
+    const nextQQOAuthEnabled =
+      body.qqOAuthEnabled !== undefined
+        ? body.qqOAuthEnabled
+        : (settings?.qqOAuthEnabled ?? false)
     const nextCustomOAuthEnabled =
       body.customOAuthEnabled !== undefined
         ? body.customOAuthEnabled
@@ -437,6 +441,7 @@ export default defineEventHandler(async (event) => {
       nextCasdoorOAuthEnabled ||
       nextGoogleOAuthEnabled ||
       nextAggregateOAuthEnabled ||
+      nextQQOAuthEnabled ||
       nextCustomOAuthEnabled
     ) {
       if (!nextOauthRedirectUri || !nextOauthStateSecret) {
@@ -586,6 +591,14 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, message: '启用聚合登陆时至少选择一种登录方式' })
     }
 
+    // 互斥逻辑：如果聚合登陆包含QQ，检查原生QQ是否已开启
+    if (nextAggregateOAuthEnabled && nextAggregateLoginTypes.includes('qq') && nextQQOAuthEnabled) {
+      throw createError({
+        statusCode: 400,
+        message: '原生 QQ 登录已启用，请先关闭原生 QQ 登录，或从聚合登陆中移除 QQ'
+      })
+    }
+
     if (body.aggregateOAuthAppId !== undefined) {
       updateData.aggregateOAuthAppId = nextAggregateAppId || null
     }
@@ -611,6 +624,46 @@ export default defineEventHandler(async (event) => {
         }
       }
       updateData.aggregateOAuthEndpoint = nextAggregateEndpoint || 'https://a.idcfx.net/connect.php'
+    }
+
+    // QQ 原生 OAuth
+    if (body.qqOAuthEnabled !== undefined) {
+      if (typeof body.qqOAuthEnabled !== 'boolean') {
+        throw createError({
+          statusCode: 400,
+          message: 'qqOAuthEnabled 必须是布尔值'
+        })
+      }
+      if (body.qqOAuthEnabled && !body.qqClientId && !settings?.qqClientId) {
+        throw createError({ statusCode: 400, message: '启用 QQ 登录时必须提供 App ID' })
+      }
+      if (body.qqOAuthEnabled && !body.qqClientSecret && !settings?.qqClientSecret) {
+        throw createError({ statusCode: 400, message: '启用 QQ 登录时必须提供 App Key' })
+      }
+      updateData.qqOAuthEnabled = body.qqOAuthEnabled
+    }
+
+    // 互斥逻辑：原生QQ与聚合登陆中的QQ不能同时开启
+    if (nextQQOAuthEnabled && nextAggregateOAuthEnabled) {
+      const aggregateHasQQ = nextAggregateLoginTypes.includes('qq')
+      if (aggregateHasQQ) {
+        // 如果开启原生QQ，自动从聚合登陆中移除QQ
+        const filteredTypes = nextAggregateLoginTypes.filter((t) => t !== 'qq')
+        if (filteredTypes.length === 0) {
+          // 如果移除QQ后聚合登陆没有其他登录方式，则关闭聚合登陆
+          updateData.aggregateOAuthEnabled = false
+        } else {
+          updateData.aggregateOAuthLoginType = JSON.stringify(filteredTypes)
+        }
+      }
+    }
+
+    if (body.qqClientId !== undefined) {
+      updateData.qqClientId = body.qqClientId
+    }
+
+    if (body.qqClientSecret !== undefined && body.qqClientSecret !== SECRET_FIELD_MASK) {
+      updateData.qqClientSecret = body.qqClientSecret
     }
 
     // Custom OAuth2

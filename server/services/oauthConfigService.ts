@@ -40,6 +40,7 @@ export const isOAuthProviderEnabled = async (provider: OAuthProvider): Promise<b
   if (provider === 'google') return !!settings.googleOAuthEnabled
   if (provider === 'oauth2') return !!settings.customOAuthEnabled
   if (provider === 'aggregate') return !!settings.aggregateOAuthEnabled
+  if (provider === 'qq') return !!settings.qqOAuthEnabled
 
   return false
 }
@@ -93,6 +94,13 @@ export const getProviderRuntimeConfig = async (
     }
   }
 
+  if (provider === 'qq') {
+    return {
+      clientId: settings.qqClientId || undefined,
+      clientSecret: settings.qqClientSecret || undefined
+    }
+  }
+
   return {
     clientId: settings.googleClientId || undefined,
     clientSecret: settings.googleClientSecret || undefined
@@ -105,6 +113,7 @@ export const getOAuthProviderDisplayName = async (provider: OAuthProvider): Prom
     if (provider === 'casdoor') return 'Casdoor'
     if (provider === 'google') return 'Google'
     if (provider === 'aggregate') return '聚合登陆'
+    if (provider === 'qq') return 'QQ'
   }
 
   const settings = await getSettings()

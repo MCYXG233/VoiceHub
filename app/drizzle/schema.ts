@@ -211,6 +211,10 @@ export const systemSettings = pgTable('SystemSettings', {
   aggregateOAuthAppKey: text('aggregateOAuthAppKey'),
   aggregateOAuthLoginType: text('aggregateOAuthLoginType').default('qq'),
   aggregateOAuthEndpoint: text('aggregateOAuthEndpoint').default('https://a.idcfx.net/connect.php'),
+  // QQ 原生 OAuth
+  qqOAuthEnabled: boolean('qqOAuthEnabled').default(false).notNull(),
+  qqClientId: text('qqClientId'),
+  qqClientSecret: text('qqClientSecret'),
   // Custom OAuth2
   customOAuthEnabled: boolean('customOAuthEnabled').default(false).notNull(),
   customOAuthDisplayName: text('customOAuthDisplayName'),

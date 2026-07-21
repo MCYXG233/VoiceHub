@@ -22,6 +22,11 @@
           :name="getAggregateOAuthLoginTypeIcon(provider.loginType)"
           :size="26"
         />
+        <Icon
+          v-else-if="provider.key === 'qq'"
+          name="oauth-qq"
+          :size="26"
+        />
         <Shield v-else :size="18" />
       </button>
     </div>
@@ -71,6 +76,9 @@ const providerButtonClass = (provider) => {
   }
   if (key === 'oauth2') {
     return `${baseClass} hover:bg-[#0f766e] hover:text-white hover:border-[#0f766e]`
+  }
+  if (key === 'qq') {
+    return `${baseClass} hover:bg-[#12b7f5] hover:text-white hover:border-[#12b7f5]`
   }
 
   return `${baseClass} hover:border-blue-500/40 hover:text-blue-400`

@@ -90,6 +90,13 @@ export default defineEventHandler(async (event) => {
     updateData.aggregateOAuthAppKey = appKey
     updateData.aggregateOAuthLoginType = JSON.stringify(loginTypes)
     updateData.aggregateOAuthEndpoint = endpoint
+  } else if (provider === 'qq') {
+    if (!process.env.QQ_CLIENT_ID || !process.env.QQ_CLIENT_SECRET) {
+      throw createError({ statusCode: 400, message: '未检测到完整的 QQ 环境配置' })
+    }
+    updateData.qqOAuthEnabled = true
+    updateData.qqClientId = process.env.QQ_CLIENT_ID
+    updateData.qqClientSecret = process.env.QQ_CLIENT_SECRET
   } else {
     throw createError({ statusCode: 400, message: '不支持的导入类型' })
   }

@@ -144,6 +144,7 @@ export const useSiteConfig = () => {
     casdoor: !!siteConfig.value.casdoorOAuthEnabled,
     google: !!siteConfig.value.googleOAuthEnabled,
     aggregate: !!siteConfig.value.aggregateOAuthEnabled,
+    qq: !!siteConfig.value.qqOAuthEnabled,
     oauth2: !!siteConfig.value.customOAuthEnabled
   }))
 
@@ -170,6 +171,9 @@ export const useSiteConfig = () => {
           name: `${getAggregateOAuthLoginTypeName(loginType)} 登录`
         })
       })
+    }
+    if (siteConfig.value.qqOAuthEnabled) {
+      providers.push({ key: 'qq', name: 'QQ 登录' })
     }
     if (siteConfig.value.customOAuthEnabled) {
       providers.push({

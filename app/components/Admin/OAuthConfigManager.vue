@@ -138,11 +138,14 @@
           <CustomSelect
             v-model="formData.aggregateOAuthLoginType"
             label="登录方式"
-            :options="aggregateLoginTypes"
+            :options="availableAggregateLoginTypes"
             placeholder="请选择至少一种登录方式"
             multiple
           />
-          <p class="text-[10px] text-zinc-600 px-1 mt-2">
+          <p v-if="formData.qqOAuthEnabled" class="text-[10px] text-amber-500 px-1 mt-2">
+            原生 QQ 登录已启用，聚合登陆中的 QQ 选项已被禁用。
+          </p>
+          <p v-else class="text-[10px] text-zinc-600 px-1 mt-2">
             可同时启用多个聚合登录平台，每个平台会作为独立身份进行登录和绑定。
           </p>
         </div>
@@ -341,7 +344,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { AlertCircle, Shield, Download } from '@lucide/vue'
 import { useToast } from '~/composables/useToast'
 import CustomSelect from '~/components/UI/Common/CustomSelect.vue'
@@ -381,7 +384,8 @@ const envData = ref({
   hasGithubConfig: false,
   hasCasdoorConfig: false,
   hasGoogleConfig: false,
-  hasAggregateConfig: false
+  hasAggregateConfig: false,
+  hasQQConfig: false
 })
 
 const oauthProviders = computed(() => [
@@ -434,10 +438,45 @@ const oauthProviders = computed(() => [
     clientSecretPlaceholder: '输入聚合登陆 AppKey',
     docUrl: 'https://a.idcfx.net/doc.php#',
     docLabel: '查看聚合登陆开发文档'
+  },
+  {
+    id: 'qq',
+    title: 'QQ OAuth（原生）',
+    hasEnvConfig: envData.value.hasQQConfig,
+    enabledKey: 'qqOAuthEnabled',
+    clientIdKey: 'qqClientId',
+    clientSecretKey: 'qqClientSecret',
+    clientIdLabel: 'QQ App ID',
+    clientIdPlaceholder: '输入 QQ 互联 App ID',
+    clientSecretLabel: 'QQ App Key',
+    clientSecretPlaceholder: '输入 QQ 互联 App Key',
+    docUrl: 'https://wiki.connect.qq.com/',
+    docLabel: '查看 QQ 互联文档'
   }
 ])
 
 const aggregateLoginTypes = [...AGGREGATE_OAUTH_LOGIN_TYPE_OPTIONS]
+
+// 当原生QQ启用时，过滤掉聚合登陆中的QQ选项
+const availableAggregateLoginTypes = computed(() => {
+  if (formData.value.qqOAuthEnabled) {
+    return aggregateLoginTypes.filter((t) => t.value !== 'qq')
+  }
+  return aggregateLoginTypes
+})
+
+// 监听原生QQ启用状态，自动从聚合登陆中移除QQ
+watch(() => formData.value.qqOAuthEnabled, (enabled) => {
+  if (enabled && formData.value.aggregateOAuthLoginType) {
+    const currentTypes = Array.isArray(formData.value.aggregateOAuthLoginType)
+      ? formData.value.aggregateOAuthLoginType
+      : [formData.value.aggregateOAuthLoginType]
+    const filtered = currentTypes.filter((t) => t !== 'qq')
+    if (filtered.length !== currentTypes.length) {
+      formData.value = { ...formData.value, aggregateOAuthLoginType: filtered }
+    }
+  }
+})
 
 const fetchEnvData = async () => {
   try {

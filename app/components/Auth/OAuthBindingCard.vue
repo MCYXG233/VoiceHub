@@ -20,6 +20,12 @@
               :size="23"
               :class="aggregateIconClass(provider.loginType)"
             />
+            <Icon
+              v-else-if="provider.key === 'qq'"
+              name="oauth-qq"
+              :size="23"
+              class="text-[#12b7f5]"
+            />
             <Shield v-else :size="20" />
           </div>
           <div class="flex flex-col">

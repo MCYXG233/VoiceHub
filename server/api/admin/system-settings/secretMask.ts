@@ -12,6 +12,7 @@ export const maskSystemSettingsSecrets = <T extends Record<string, any>>(setting
     casdoorClientSecret: settings.casdoorClientSecret ? SECRET_FIELD_MASK : settings.casdoorClientSecret,
     googleClientSecret: settings.googleClientSecret ? SECRET_FIELD_MASK : settings.googleClientSecret,
     aggregateOAuthAppKey: settings.aggregateOAuthAppKey ? SECRET_FIELD_MASK : settings.aggregateOAuthAppKey,
+    qqClientSecret: settings.qqClientSecret ? SECRET_FIELD_MASK : settings.qqClientSecret,
     customOAuthClientSecret: settings.customOAuthClientSecret
       ? SECRET_FIELD_MASK
       : settings.customOAuthClientSecret,
